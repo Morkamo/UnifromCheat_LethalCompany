@@ -1,4 +1,4 @@
-# Unifrom Cheat 2.0.0 (Lethal Company)
+# Unifrom (Cheat for Lethal Company)
 ------------------------------------------
 1) Перед скачиванием отключите Windows Defender. (он ругается на Sharp Injector)
 2) Скачайте и распакуйте архив в любое удобное место. (ПАРОЛЬ: 1234)
