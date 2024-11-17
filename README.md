@@ -1,1 +1,1 @@
-# UnifromCheat 2.0.0 (Lethal Company)
+# Unifrom Cheat 2.0.0 (Lethal Company)
