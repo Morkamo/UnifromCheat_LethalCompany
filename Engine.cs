@@ -12,7 +12,8 @@ using Rect = UnityEngine.Rect;
 
 namespace UnifromEngine
 {
-    public class Engine : MonoBehaviour
+    [BepInPlugin("ru.morkamo.unifrom", "Unifrom", "2.1.0")]
+    public class Engine : BaseUnityPlugin
     {
         public string cheatVersion = "2.1.0"; 
         
@@ -20,7 +21,7 @@ namespace UnifromEngine
         private Harmony harmony;
         
         public Noclip Noclip;
-        public NoclipComponent noclipComponent;
+        public NoclipComponent noclipComponent; 
         public WallHack Wallhack;
 
         public List<GameObject> UnifromHints = new List<GameObject>();
@@ -295,8 +296,13 @@ namespace UnifromEngine
                     {
                         if (hint.name != "NoclipStateInfo" && hint.name != "GodModeStateInfo")
                             hint.SetActive(true);
-                        else if ((Noclip.isActive && isNoclipOn && isMisscaleonsOn) || isGodModeEnabled)
-                            hint.SetActive(true);
+                        else if (hint.name == "GodModeStateInfo")
+                        {
+                            if (isGodModeEnabled)
+                                hint.SetActive(true);
+                            else
+                                hint.SetActive(false);
+                        }
                     }
                 }
                 
