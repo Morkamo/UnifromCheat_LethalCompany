@@ -24,7 +24,6 @@
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <PlatformTarget>x64</PlatformTarget>
-        <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
         <OutputPath>D:\Platforms\Steam\steamapps\common\Lethal Company\BepInEx\plugins</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
@@ -35,6 +34,7 @@
         <Compile Include="Engine.cs" />
         <Compile Include="EventSystem.cs" />
         <Compile Include="Loader.cs" />
+        <Compile Include="Localizations.cs" />
         <Compile Include="Patches\AntiGhostGirl.cs" />
         <Compile Include="Patches\BypassForDoors.cs" />
         <Compile Include="Patches\DisableEnemyAI.cs" />
@@ -52,8 +52,8 @@
     </ItemGroup>
     <ItemGroup>
       <Reference Include="0Harmony">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\0Harmony.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\0Harmony.dll</HintPath>
       </Reference>
       <Reference Include="AmazingAssets.TerrainToMesh">
         <Private>false</Private>
@@ -68,28 +68,28 @@
         <HintPath>..\Libs\Assembly-CSharp-firstpass.dll</HintPath>
       </Reference>
       <Reference Include="AssetRipper.Primitives">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\AssetRipper.Primitives.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\AssetRipper.Primitives.dll</HintPath>
       </Reference>
       <Reference Include="BepInEx.Core">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Core.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Core.dll</HintPath>
       </Reference>
       <Reference Include="BepInEx.Preloader.Core">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Preloader.Core.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Preloader.Core.dll</HintPath>
       </Reference>
       <Reference Include="BepInEx.Unity.Common">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Unity.Common.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Unity.Common.dll</HintPath>
       </Reference>
       <Reference Include="BepInEx.Unity.Mono">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Unity.Mono.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Unity.Mono.dll</HintPath>
       </Reference>
       <Reference Include="BepInEx.Unity.Mono.Preloader">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Unity.Mono.Preloader.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\BepInEx.Unity.Mono.Preloader.dll</HintPath>
       </Reference>
       <Reference Include="ClientNetworkTransform">
         <Private>false</Private>
@@ -108,32 +108,32 @@
         <HintPath>..\Libs\Facepunch.Steamworks.Win64.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Cecil">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\Mono.Cecil.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\Mono.Cecil.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Cecil.Mdb">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Cecil.Pdb">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Cecil.Rocks">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Security">
         <Private>false</Private>
         <HintPath>..\Libs\Mono.Security.dll</HintPath>
       </Reference>
       <Reference Include="MonoMod.RuntimeDetour">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
       </Reference>
       <Reference Include="MonoMod.Utils">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\MonoMod.Utils.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\MonoMod.Utils.dll</HintPath>
       </Reference>
       <Reference Include="mscorlib">
         <Private>false</Private>
@@ -148,8 +148,8 @@
         <HintPath>..\Libs\Newtonsoft.Json.dll</HintPath>
       </Reference>
       <Reference Include="SemanticVersioning">
+        <HintPath>C:\Users\oneta\Desktop\Unifrom Engine (Content Warning)\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\SemanticVersioning.dll</HintPath>
         <Private>false</Private>
-        <HintPath>..\..\..\Internal Scripts\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core\SemanticVersioning.dll</HintPath>
       </Reference>
       <Reference Include="System">
         <Private>false</Private>

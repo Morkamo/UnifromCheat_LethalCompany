@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using BepInEx;
+using BepInEx.Unity.Mono;
 using GameNetcodeStuff;
 using HarmonyLib;
 using TMPro;
@@ -6,11 +8,14 @@ using UnifromEngine.Patches;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnifromEngine.TextController;
+using Rect = UnityEngine.Rect;
 
 namespace UnifromEngine
 {
     public class Engine : MonoBehaviour
     {
+        public string cheatVersion = "2.1.0"; 
+        
         public static Engine Instance;
         private Harmony harmony;
         
@@ -32,13 +37,24 @@ namespace UnifromEngine
         public bool MenuState = true;
         public bool AdvancedMenuSettings;
         public float MC_R = 1;
-        public float MC_G;
-        public float MC_B = 1;
+        public float MC_G = 0.8f;
+        public float MC_B = 0.8f;
         public float MC_A = 1;
         public bool DisableAllTextHints;
+        public bool islocalizationRu = true;
+        public bool isLocSwitched;
 
         // player
+        public bool isGodModeEnabled;
         public bool isGodModeActive;
+        public string GodModeState;
+        private TextMeshProUGUI GodModeStateInfo;
+
+        public bool PlayerHealthController;
+        public bool isHealthControllerSwitched;
+        public float HealValue = 20;
+        public TextMeshProUGUI CurrentHealthUIText;
+        
         public bool isInfiniteStaminaActive; 
         public bool isInfiniteBatteryActive;
         
@@ -53,6 +69,14 @@ namespace UnifromEngine
         public bool isWallHackOn = true;
         
         public bool isItemWallHackOn;
+        
+        public float IC_R = 0.8f;
+        public float IC_G = 0.4f;
+        public float IC_B = 0.4f;
+        public float IC_A = 1;
+        
+        public bool hideInShip;
+        public bool showItemName;
         public bool showItemPrice;
         public bool hideBigItems;
 
@@ -115,18 +139,42 @@ namespace UnifromEngine
 
             RectMenu = new Rect((Screen.width - width) / 2, (Screen.height - height) / 2, width, height);
 
-            Debug.LogWarning($"\n--------------------------\n     [CHEAT-INJECTED]\n Welcome to Unifrom 2.0.0\n--------------------------\n");
-
-            CreateText("Unifrom 2.0.0 - by Morkamo", "UnifromBadge", 1000f, 470f, 14);
+            
+            CreateText($"Unifrom {cheatVersion} - by Morkamo", "UnifromBadge", 1000f, 470f, 14);
             UnifromHints.Add(GameObject.Find("UnifromBadge"));
+            
+            GodModeStateInfo = CreateText($"God mode: <b>{GodModeState}</b>",
+                "GodModeStateInfo", 110, -505);
+            
+            UnifromHints.Add(GameObject.Find("GodModeStateInfo"));
+            GodModeStateInfo.gameObject.SetActive(false);
+            
+            
+            CurrentHealthUIText = CreateText($"HP: 0", 
+                "CurrentHealthUIText", -670, -500, 24);
+            
+            UnifromHints.Add(GameObject.Find("CurrentHealthUIText"));
+
+            Debug.LogWarning($"\n--------------------------\n     [CHEAT-INJECTED]\n Welcome to Unifrom {cheatVersion}\n--------------------------\n");
         }
 
         private void Update()
         {
             player = FindObjectOfType<PlayerControllerB>();
+            
+            if (!DisableAllTextHints)
+                if (player == null)
+                    CurrentHealthUIText.text = $"HP: 0";
+                else
+                    CurrentHealthUIText.text = $"HP: {GameNetworkManager.Instance.localPlayerController.health}";
 
-            if (player == null) 
+            if (player == null)
                 return;
+
+            if (Keyboard.current.zKey.wasPressedThisFrame && isGodModeEnabled)
+            {
+                isGodModeActive = !isGodModeActive;
+            }
 
             Wallhack.RenderItems();
             Wallhack.RenderEnemies();
@@ -148,6 +196,27 @@ namespace UnifromEngine
             
             if (isMisscaleonsOn && isMagnetItemsOn)
                 MagnetItems.MagnetizeItems();
+            
+            if (isGodModeEnabled)
+            {
+                GodModeStateInfo.gameObject.SetActive(true);
+                
+                if (!isGodModeActive)
+                {
+                    GodModeState = "<color=#930000>OFF</color>";
+                    GodModeStateInfo.text = $"God mode: <b>{GodModeState}</b>";
+                }
+                else
+                {
+                    GodModeState = "<color=#00930d>ON</color>";
+                    GodModeStateInfo.text = $"God mode: <b>{GodModeState}</b>";
+                }
+            }
+            else
+            {
+                GodModeStateInfo.gameObject.SetActive(false);
+                isGodModeActive = false;
+            }
         }
 
         public void OnGUI()
@@ -189,7 +258,7 @@ namespace UnifromEngine
                 GUI.backgroundColor = new Color(MC_R, MC_G, MC_B, MC_A);
                 GUI.color = new Color(MC_R, MC_G, MC_B, MC_A);
 
-                RectMenu = GUILayout.Window(MenuID, RectMenu, GUIMenu, "Unifrom 2.0.0");
+                RectMenu = GUILayout.Window(MenuID, RectMenu, GUIMenu, $"Unifrom {cheatVersion}");
 
                 GUI.matrix = originalMatrix;
             }
@@ -224,9 +293,9 @@ namespace UnifromEngine
                 {
                     foreach (var hint in UnifromHints)
                     {
-                        if (hint.name != "NoclipStateInfo")
+                        if (hint.name != "NoclipStateInfo" && hint.name != "GodModeStateInfo")
                             hint.SetActive(true);
-                        else if (Noclip.isActive && isNoclipOn && isMisscaleonsOn)
+                        else if ((Noclip.isActive && isNoclipOn && isMisscaleonsOn) || isGodModeEnabled)
                             hint.SetActive(true);
                     }
                 }
@@ -249,13 +318,108 @@ namespace UnifromEngine
                 // A
                 GUILayout.Label("B: " + MC_A.ToString("F1"));
                 MC_A = GUILayout.HorizontalSlider(MC_A, 0, 1, GUILayout.Width(100));
+
+                GUILayout.BeginVertical("box");
+                
+                if (GUILayout.Button("Switch localization (EU/RU)"))
+                {
+                    islocalizationRu = !islocalizationRu;
+
+                    if (!islocalizationRu)
+                    {
+                        GrabbableObject[] grabbableObjects = Wallhack.grabbableObjects;
+
+                        foreach (var grabbable in grabbableObjects)
+                        {
+                            foreach (var key in Localizations.EU)
+                            {
+                                if (grabbable.itemProperties.name == key.Key)
+                                    grabbable.itemProperties.name = key.Value;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (islocalizationRu)
+                        {
+                            GrabbableObject[] grabbableObjects = Wallhack.grabbableObjects;
+
+                            foreach (var grabbable in grabbableObjects)
+                            {
+                                foreach (var key in Localizations.RU)
+                                {
+                                    if (grabbable.itemProperties.name == key.Key)
+                                        grabbable.itemProperties.name = key.Value;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (!islocalizationRu)
+                    GUILayout.Label("              Current loc: [EU]");
+                else
+                    GUILayout.Label("              Current loc: [RU]");
+                
+                GUILayout.EndVertical();
                 
                 GUILayout.EndVertical();
             }
             
             GUILayout.EndVertical();
             
-            isGodModeActive = GUILayout.Toggle(isGodModeActive, " God mode");
+            
+            if (!isGodModeEnabled)
+                isGodModeEnabled = GUILayout.Toggle(isGodModeEnabled, " God mode");
+            else
+            {
+                GUILayout.BeginVertical("box");
+                
+                isGodModeEnabled = GUILayout.Toggle(isGodModeEnabled, " God mode");
+                GUILayout.Label("Bind: [z]"); 
+                
+                GUILayout.EndVertical();
+            }
+
+            if (!PlayerHealthController)
+            {
+                PlayerHealthController = GUILayout.Toggle(PlayerHealthController, " Health control");
+                CurrentHealthUIText.gameObject.SetActive(false);
+            }
+            else
+            {
+                CurrentHealthUIText.gameObject.SetActive(true);
+                GUILayout.BeginVertical("box");
+                
+                PlayerHealthController = GUILayout.Toggle(PlayerHealthController, " Health control");
+                
+                GUILayout.Label("Need HP amount: " + HealValue.ToString("F0"));
+                HealValue = GUILayout.HorizontalSlider(HealValue, 1, 100);
+
+                if (GUILayout.Button("ADD"))
+                {
+                    GameNetworkManager.Instance.localPlayerController.health += (int)HealValue;
+                    
+                    if (GameNetworkManager.Instance.localPlayerController.health > 100)
+                        GameNetworkManager.Instance.localPlayerController.health = 100;
+
+                }
+                
+                if (GUILayout.Button("SET"))
+                {
+                    GameNetworkManager.Instance.localPlayerController.health = (int)HealValue;
+                }
+
+                GUILayout.EndVertical();
+            }
+
+            if (PlayerHealthController)
+            {
+                GUILayout.BeginVertical("box");
+                
+                GUILayout.EndVertical();
+            }
+
             isInfiniteStaminaActive = GUILayout.Toggle(isInfiniteStaminaActive, " Infinity stamina");
             isInfiniteBatteryActive = GUILayout.Toggle(isInfiniteBatteryActive, " Infinity battery");
             isAdvancedDoorsOn = GUILayout.Toggle(isAdvancedDoorsOn, " Advanced doors");
@@ -307,7 +471,26 @@ namespace UnifromEngine
                 if (isItemWallHackOn)
                 {
                     GUILayout.BeginVertical("box");
+                    
+                    GUILayout.BeginVertical("box");
+                    GUILayout.Label("Text color:");
+                    
+                    GUILayout.Label("R: " + IC_R.ToString("F1"));
+                    IC_R = GUILayout.HorizontalSlider(IC_R, 0, 1, GUILayout.Width(100));
+                    
+                    GUILayout.Label("G: " + IC_G.ToString("F1"));
+                    IC_G = GUILayout.HorizontalSlider(IC_G, 0, 1, GUILayout.Width(100));
+                    
+                    GUILayout.Label("B: " + IC_B.ToString("F1"));
+                    IC_B = GUILayout.HorizontalSlider(IC_B, 0, 1, GUILayout.Width(100));
+                    
+                    GUILayout.Label("A: " + IC_A.ToString("F1"));
+                    IC_A = GUILayout.HorizontalSlider(IC_A, 0, 1, GUILayout.Width(100));
+                    
+                    GUILayout.EndVertical();
 
+                    hideInShip = GUILayout.Toggle(hideInShip, " Hide in ship");
+                    showItemName = GUILayout.Toggle(showItemName, " Show name");
                     showItemPrice = GUILayout.Toggle(showItemPrice, " Show price");
                     hideBigItems = GUILayout.Toggle(hideBigItems, " Hide heavy items");
 
@@ -395,7 +578,7 @@ namespace UnifromEngine
                 {
                     GUILayout.Label("Bind: [alt]");
                     GUILayout.Label("Speed: " + noclipSpeed.ToString("F1"));
-                    noclipSpeed = GUILayout.HorizontalSlider(noclipSpeed, 4.6f, 30f);
+                    noclipSpeed = GUILayout.HorizontalSlider(noclipSpeed, 0.5f, 30f);
                 }
 
                 isAntiGhostGirlOn = GUILayout.Toggle(isAntiGhostGirlOn, " Anti-ghost girl");

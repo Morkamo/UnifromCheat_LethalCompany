@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using GameNetcodeStuff;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -54,15 +56,16 @@ namespace UnifromEngine.Patches
                         itemLabel.transform.localPosition = Vector3.zero;
 
                         itemTextMesh = itemLabel.AddComponent<TextMesh>();
-                        itemTextMesh.text = "☐";
+                        itemTextMesh.text = $"\n    ☐\n{grabbable.itemProperties.name}";
                         itemTextMesh.characterSize = 0.3f;
-                        itemTextMesh.color = new Color32(255, 150, 0, 255);
+                        itemTextMesh.color = new Color(Engine.Instance.IC_R, Engine.Instance.IC_G, Engine.Instance.IC_B, Engine.Instance.IC_A);
                         itemTextMesh.anchor = TextAnchor.MiddleCenter;
                         itemTextMesh.transform.LookAt(RoundManager.Instance.playersManager.activeCamera.transform);
-                        itemTextMesh.transform.rotation = Quaternion.LookRotation(GetPlayer().activeCamera.transform.forward);
                     }
                     else
                     {
+                        itemTextMesh.color = new Color(Engine.Instance.IC_R, Engine.Instance.IC_G, Engine.Instance.IC_B, Engine.Instance.IC_A);
+                        
                         itemTextMesh.transform.LookAt(RoundManager.Instance.playersManager.activeCamera.transform);
                         itemTextMesh.transform.rotation = Quaternion.LookRotation(GetPlayer().activeCamera.transform.forward);
                     }
@@ -77,14 +80,32 @@ namespace UnifromEngine.Patches
                             else
                                 if (Engine.Instance.showItemPrice)
                                     if (Engine.Instance.sortSize <= 0)
-                                        itemTextMesh.text = $"\n    ☐\n<color=#ff0064>Price: {grabbable.scrapValue}</color>";
+                                        itemTextMesh.text = $"\n    ☐\nPrice: {grabbable.scrapValue}";
                                     else
-                                        if (Engine.Instance.sortSize > 18)
-                                            itemTextMesh.text = $"<color=#ff0064><size={Engine.Instance.sortSize}>[Price: {grabbable.scrapValue}]</size></color>";
+                                        if (Engine.Instance.sortSize > 20)
+                                            if (Engine.Instance.showItemName)
+                                                itemTextMesh.text = $"\n<size={Engine.Instance.sortSize}>{grabbable.itemProperties.name}\n[Price: {grabbable.scrapValue}]</size>";
+                                            else
+                                                itemTextMesh.text = $"\n<size={Engine.Instance.sortSize}>[Price: {grabbable.scrapValue}]</size>";
                                         else
-                                            itemTextMesh.text = $"\n    ☐\n<color=#ff0064><size={Engine.Instance.sortSize}>Price: {grabbable.scrapValue}</size></color>";
+                                            if (Engine.Instance.showItemName)
+                                                itemTextMesh.text = $"\n\n     ☐\n<size={Engine.Instance.sortSize}>{grabbable.itemProperties.name}\nPrice: {grabbable.scrapValue}</size>";
+                                            else
+                                                itemTextMesh.text = $"\n\n     ☐\n<size={Engine.Instance.sortSize}>\nPrice: {grabbable.scrapValue}</size>";
                                 else
-                                    itemTextMesh.text = "☐";
+                                    if (Engine.Instance.showItemName)
+                                        itemTextMesh.text = $"\n    ☐\n{grabbable.itemProperties.name}";
+                                    else
+                                        itemTextMesh.text = $"\n    ☐";
+
+                        if (Engine.Instance.hideInShip)
+                        {
+                            if (!GameNetworkManager.Instance.gameHasStarted)
+                                grabbable.isInShipRoom = true;
+                            
+                            if (grabbable.isInShipRoom)
+                                itemTextMesh.text = null;
+                        }
                     }
                 }
             }
@@ -118,9 +139,9 @@ namespace UnifromEngine.Patches
                         enemyLabel.transform.localPosition = Vector3.zero;
 
                         enemyTextMesh = enemyLabel.AddComponent<TextMesh>();
-                        enemyTextMesh.text = $"             ☐ \n {enemy.name}";
+                        enemyTextMesh.text = $"             ☐ \n {enemy.enemyType.enemyName}";
                         enemyTextMesh.characterSize = 0.5f;
-                        enemyTextMesh.color = Color.red;
+                        enemyTextMesh.color = Color.red; 
                         enemyTextMesh.anchor = TextAnchor.MiddleCenter;
                         enemyTextMesh.transform.LookAt(GetPlayer().activeCamera.transform);
                         enemyTextMesh.transform.rotation = Quaternion.LookRotation(GetPlayer().activeCamera.transform.forward);
@@ -129,6 +150,12 @@ namespace UnifromEngine.Patches
                     {
                         enemyTextMesh.transform.LookAt(GetPlayer().activeCamera.transform);
                         enemyTextMesh.transform.rotation = Quaternion.LookRotation(GetPlayer().activeCamera.transform.forward);
+                    }
+                    
+                    if (enemy.isEnemyDead)
+                    {
+                        enemyTextMesh.color = Color.gray;
+                        enemyTextMesh.text = $"{enemy.enemyType.enemyName} <b>[Dead]</b>";
                     }
                 }
             }
@@ -262,7 +289,7 @@ namespace UnifromEngine.Patches
                 Destroy(exit);
             }
             
-            EnemyTextObjects.Clear();
+            ExitDoorTextObjects.Clear();
         }
         
         
@@ -292,6 +319,36 @@ namespace UnifromEngine.Patches
             exits = FindObjectsOfType<EntranceTeleport>();
         }
 
+        private IEnumerator Translate()
+        {
+            yield return new WaitForSeconds(3f);
+            
+            if (!Engine.Instance.islocalizationRu)
+            {
+                foreach (var grabbable in grabbableObjects)
+                {
+                    foreach (var key in Localizations.EU)
+                    {
+                        if (grabbable.itemProperties.name == key.Key)
+                            grabbable.itemProperties.name = key.Value;
+                    }
+                }
+            }
+            else
+            {
+                if (Engine.Instance.islocalizationRu)
+                {
+                    foreach (var grabbable in grabbableObjects)
+                    {
+                        foreach (var key in Localizations.RU)
+                        {
+                            if (grabbable.itemProperties.name == key.Key)
+                                grabbable.itemProperties.name = key.Value;
+                        }
+                    }
+                }
+            }
+        }
         
         private void Start()
         {
@@ -308,6 +365,9 @@ namespace UnifromEngine.Patches
             
             StopCoroutine(SearchExits());
             StartCoroutine(SearchExits());
+            
+            StopCoroutine(Translate());
+            StartCoroutine(Translate());
         }
 
         private static StartOfRound GetPlayer()
