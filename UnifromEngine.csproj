@@ -46,6 +46,7 @@
         <Compile Include="Patches\GodMode.cs" />
         <Compile Include="Patches\InfiniteStamina.cs" />
         <Compile Include="Patches\JumpForcePatch.cs" />
+        <Compile Include="Patches\Shotgun\InfiniteAmmo.cs" />
         <Compile Include="Patches\WallHack.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="TextController.cs" />

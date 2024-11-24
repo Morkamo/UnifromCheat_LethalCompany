@@ -98,14 +98,8 @@ namespace UnifromEngine.Patches
                                     else
                                         itemTextMesh.text = $"\n    ☐";
 
-                        if (Engine.Instance.hideInShip)
-                        {
-                            if (!GameNetworkManager.Instance.gameHasStarted)
-                                grabbable.isInShipRoom = true;
-                            
-                            if (grabbable.isInShipRoom)
-                                itemTextMesh.text = null;
-                        }
+                        if (Engine.Instance.hideIfPlayerInShip && GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
+                            itemTextMesh.text = null;
                     }
                 }
             }

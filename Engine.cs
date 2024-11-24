@@ -7,21 +7,21 @@ using TMPro;
 using UnifromEngine.Patches;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using static UnifromEngine.TextController;
 using Rect = UnityEngine.Rect;
 
 namespace UnifromEngine
 {
-    [BepInPlugin("ru.morkamo.unifrom", "Unifrom", "2.1.0")]
-    public class Engine : BaseUnityPlugin
+    public class Engine : MonoBehaviour
     {
-        public string cheatVersion = "2.1.0"; 
+        public string cheatVersion = "2.2.0";  
         
         public static Engine Instance;
         private Harmony harmony;
         
         public Noclip Noclip;
-        public NoclipComponent noclipComponent; 
+        public NoclipComponent noclipComponent;
         public WallHack Wallhack;
 
         public List<GameObject> UnifromHints = new List<GameObject>();
@@ -65,6 +65,10 @@ namespace UnifromEngine
         // doors
         public bool isAdvancedDoorsOn;
         public bool isFastDoorsOn;
+        
+        // Shotgun
+        public bool isAdvancedShotgun;
+        public bool isInfiniteAmmo;
 
         // wallhack
         public bool isWallHackOn = true;
@@ -76,7 +80,7 @@ namespace UnifromEngine
         public float IC_B = 0.4f;
         public float IC_A = 1;
         
-        public bool hideInShip;
+        public bool hideIfPlayerInShip;
         public bool showItemName;
         public bool showItemPrice;
         public bool hideBigItems;
@@ -93,6 +97,8 @@ namespace UnifromEngine
 
         // visuals
         public bool isVisualsOn = true;
+        public bool crosshairOn;
+        public GameObject crosshair;
         public bool isNoFogOn;
         
         public bool isFullBrightOn = true;
@@ -139,22 +145,20 @@ namespace UnifromEngine
             float height = 700f * dpiScaling;
 
             RectMenu = new Rect((Screen.width - width) / 2, (Screen.height - height) / 2, width, height);
-
             
             CreateText($"Unifrom {cheatVersion} - by Morkamo", "UnifromBadge", 1000f, 470f, 14);
             UnifromHints.Add(GameObject.Find("UnifromBadge"));
             
-            GodModeStateInfo = CreateText($"God mode: <b>{GodModeState}</b>",
-                "GodModeStateInfo", 110, -505);
-            
+            GodModeStateInfo = CreateText($"God mode: <b>{GodModeState}</b>", "GodModeStateInfo", 110, -505);
             UnifromHints.Add(GameObject.Find("GodModeStateInfo"));
             GodModeStateInfo.gameObject.SetActive(false);
             
             
-            CurrentHealthUIText = CreateText($"HP: 0", 
-                "CurrentHealthUIText", -670, -500, 24);
-            
+            CurrentHealthUIText = CreateText($"HP: 0", "CurrentHealthUIText", -670, -500, 24);
             UnifromHints.Add(GameObject.Find("CurrentHealthUIText"));
+
+            CreateText("+", "Crosshair", 0, 0, 36, Color.white, 0);
+            crosshair = GameObject.Find("Crosshair");
 
             Debug.LogWarning($"\n--------------------------\n     [CHEAT-INJECTED]\n Welcome to Unifrom {cheatVersion}\n--------------------------\n");
         }
@@ -246,7 +250,7 @@ namespace UnifromEngine
             if (MenuState)
             {
                 Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
+                Cursor.lockState = CursorLockMode.Confined;
 
                 Matrix4x4 originalMatrix = GUI.matrix;
 
@@ -301,7 +305,7 @@ namespace UnifromEngine
                             if (isGodModeEnabled)
                                 hint.SetActive(true);
                             else
-                                hint.SetActive(false);
+                                hint.SetActive(false); 
                         }
                     }
                 }
@@ -462,6 +466,15 @@ namespace UnifromEngine
                 
                 GUILayout.EndVertical();
             }
+
+            isAdvancedShotgun = GUILayout.Toggle(isAdvancedShotgun, " Advanced shotgun");
+
+            if (isAdvancedShotgun)
+            {
+                GUILayout.BeginVertical("box");
+                isInfiniteAmmo = GUILayout.Toggle(isInfiniteAmmo, " Infinite ammo");
+                GUILayout.EndVertical();
+            }
             
             isEnemyAIDisabled = GUILayout.Toggle(isEnemyAIDisabled, " Disable enemy AI (only for you)");
 
@@ -495,7 +508,7 @@ namespace UnifromEngine
                     
                     GUILayout.EndVertical();
 
-                    hideInShip = GUILayout.Toggle(hideInShip, " Hide in ship");
+                    hideIfPlayerInShip = GUILayout.Toggle(hideIfPlayerInShip, " Hide in ship");
                     showItemName = GUILayout.Toggle(showItemName, " Show name");
                     showItemPrice = GUILayout.Toggle(showItemPrice, " Show price");
                     hideBigItems = GUILayout.Toggle(hideBigItems, " Hide heavy items");
@@ -534,7 +547,20 @@ namespace UnifromEngine
             {
                 GUILayout.BeginVertical("box");
                 GUILayout.Label("Settings:");
+
+                crosshairOn = GUILayout.Toggle(crosshairOn, " Crosshair");
                 
+                if (crosshairOn)
+                {
+                    if (!crosshair.activeSelf)
+                        crosshair.SetActive(true);
+                }
+                else
+                {
+                    if (crosshair.activeSelf)
+                        crosshair.SetActive(false);
+                }
+
                 isNoFogOn = GUILayout.Toggle(isNoFogOn, " No fog");
                 isFullBrightOn = GUILayout.Toggle(isFullBrightOn, " Full bright");
                 
