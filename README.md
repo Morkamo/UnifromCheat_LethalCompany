@@ -1,4 +1,4 @@
-# Unifrom 2.1.0 (Cheat mod for Lethal Company)
+# Unifrom 2.2.0 (Cheat mod for Lethal Company)
 ------------------------------------------
 ```
 Прямое инжектирование (без BeplnEx)
